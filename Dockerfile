@@ -1,6 +1,6 @@
-FROM alpine:3.15.0
+FROM alpine:3.18.4
 
-ENV AWS_CLI_VERSION=1.22.71
+ENV AWS_CLI_VERSION=1.30.0
 
 RUN apk update && apk add --no-cache curl py3-pip groff ncurses gpg gpg-agent
 RUN python3 -m pip install --no-cache-dir --upgrade pip
