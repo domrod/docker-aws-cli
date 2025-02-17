@@ -7,6 +7,7 @@ RUN unzip awscliv2.zip && ./aws/install
 
 
 FROM debian:bookworm-slim
+RUN apt update && apt install -y groff-base less
 COPY --from=build /usr/local/aws-cli /usr/local/aws-cli
 COPY --from=build /usr/local/bin /usr/local/bin
 RUN useradd -m aws -s /bin/bash
