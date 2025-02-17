@@ -1,20 +1,19 @@
-FROM alpine:3.18.4
+FROM debian:bookworm-slim AS build
 
-ENV AWS_CLI_VERSION=1.30.0
+ENV AWS_CLI_VERSION=2.22.35
+RUN apt update && apt install -y curl zip
+RUN curl -o awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_CLI_VERSION}.zip
+RUN unzip awscliv2.zip && ./aws/install
 
-RUN apk update && apk add --no-cache curl py3-pip groff ncurses gpg gpg-agent
-RUN python3 -m pip install --no-cache-dir --upgrade pip
 
-RUN adduser -D -g '' aws
+FROM debian:bookworm-slim
+COPY --from=build /usr/local/aws-cli /usr/local/aws-cli
+COPY --from=build /usr/local/bin /usr/local/bin
+RUN useradd -m aws -s /bin/bash
 USER aws 
-WORKDIR /home/aws
-RUN mkdir /home/aws/.gpg_public_keys
 RUN mkdir /home/aws/.aws
-ENV PATH="/home/aws/.local/bin:$PATH"
 
-RUN pip3 install --no-cache-dir awscli==${AWS_CLI_VERSION} && pip3 install awscli-plugin-endpoint
-RUN pip3 cache purge
+RUN echo 'export PS1="$(tput setaf 3)[aws-cli]$ $(tput sgr0)"' >> /home/aws/.bashrc
+WORKDIR /home/aws/
 
-ENV PS1="$(tput setaf 3)[aws-cli]$ $(tput sgr0)"
-
-CMD [ "/bin/sh" ]
+CMD [ "/bin/bash" ]
